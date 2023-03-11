@@ -1,6 +1,6 @@
 import {initializeApp} from "firebase/app"
 import {
-    getFirestore, collection, getDocs, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit
+    getFirestore, collection, getDocs, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where
 } from "firebase/firestore"
 
 
@@ -30,6 +30,7 @@ const userInputMsg = document.querySelector("#usr")
 const userName = document.querySelector(".new-name")
 const chatList = document.querySelector(".messages-chat")
 
+
 let localNewUser = []
 userName.addEventListener("submit", evt => {
     evt.preventDefault()
@@ -39,22 +40,41 @@ userName.addEventListener("submit", evt => {
     userName.reset()
 
 })
-function loadMessages() {
-  // Create the query to load the last 12 messages and listen for new ones.
-  const recentMessagesQuery = query(collection(getFirestore(), 'chat'), orderBy('timestamp', 'desc'), limit(12));
-    onSnapshot(recentMessagesQuery, function(snapshot) {
-    snapshot.docChanges().forEach(function(change) {
-      if (change.type === 'added') {
-        let injectHtml = `
+const now = new Date()
+
+const currentRoom = document.querySelector(".chat-rooms");
+let room = "#general"
+
+
+
+
+
+function loadMessages(room) {
+    // Create the query to load the last 12 messages and listen for new ones.
+    const recentMessagesQuery = query(collection(getFirestore(), 'chat'), where("room", "==", room), limit(10));
+    onSnapshot(recentMessagesQuery, function (snapshot) {
+        snapshot.docChanges().forEach(function (change) {
+            if (change.type === 'added') {
+                let injectHtml = `
               <li class="message text-only">
                  <span class="text"><strong>${change.doc.data()["name"]}:  </strong></span>
                 <span class="text">${change.doc.data()["message"]}</span></li>
-                <p class="time">${change.doc.data()["timestamp"]}</p>
+                <p class="time">${now.toTimeString()}</p>
               `
-            chatList.innerHTML += injectHtml;
-      }})})}
+                chatList.innerHTML += injectHtml;
 
-loadMessages()
+            }
+        })
+    })
+}
+currentRoom.addEventListener("click", evt => {
+    room = evt.target.textContent
+    chatList.innerHTML = ""
+    loadMessages(room)
+
+})
+// loadMessages(room)
+
 // getDocs(colRef).then(snapshot => {
 //     snapshot.docChanges().forEach(change => {
 //         if (change.type === "added") {
@@ -69,7 +89,6 @@ loadMessages()
 //     })
 // })
 
-
 userInputMsg.addEventListener("submit", evt => {
     evt.preventDefault();
     let msg = userInputMsg.querySelector("input")
@@ -79,16 +98,17 @@ userInputMsg.addEventListener("submit", evt => {
     } else {
         name = localNewUser
     }
+
     addDoc(colRef, {
         message: msg.value,
         name: name,
-        timestamp: serverTimestamp()
+        timestamp: now.toTimeString(),
+        room: room
 
     })
     userInputMsg.reset()
 
 })
-
 
 
 
