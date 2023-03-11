@@ -1,3 +1,8 @@
+body {
+  padding: 5%;
+  background-color: #F5F5F5;
+}
+
 .container{
   max-width: 600px;
 }
@@ -10,5 +15,20 @@
 .btn:focus{
   outline: none !important;
 }
-
+.text-only {
+  margin-left: 45px;
+  padding: 7px;
+}
+.time {
+  font-size: 10px;
+  color: #8e8686;
+  margin-bottom:10px;
+  margin-left: 85px;
+}
+.messages-chat .text {
+  margin: 0 35px;
+  background-color: #eaeaea;
+  padding: 15px;
+  border-radius: 12px;
+}
 
